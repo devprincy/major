@@ -6,7 +6,7 @@ import AnalyticsChart from '../components/AnalyticsChart';
 import Heatmap from '../components/Heatmap';
 import Upgrade from './Upgrade';
 
-const API = 'http://localhost:5000/api/routines';
+const API = `${process.env.REACT_APP_API_URL}/api/routines`;
 
 function Home({ onBlockToggle, isPremium: isPremiumProp }) {
   const [blocks, setBlocks] = useState([]);

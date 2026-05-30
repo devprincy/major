@@ -4,7 +4,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import ProfileModal from './components/ProfileModal';
 
-const AUTH_API = 'http://localhost:5000/api/auth';
+const AUTH_API = `${process.env.REACT_APP_API_URL}/api/auth`;
 
 function App() {
   const [user, setUser] = useState(() => {

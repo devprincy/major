@@ -5,7 +5,7 @@ import {
   Tooltip, ResponsiveContainer, BarChart, Bar
 } from 'recharts';
 
-const API = 'http://localhost:5000/api/routines';
+const API = `${process.env.REACT_APP_API_URL}/api/routines`;
 
 function AnalyticsChart({ isPremium, onUpgrade }) {
   const [history, setHistory] = useState([]);
