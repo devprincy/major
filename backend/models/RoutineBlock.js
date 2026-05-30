@@ -6,7 +6,10 @@ const RoutineBlockSchema = new mongoose.Schema({
   durationMins: { type: Number, required: true },
   category: { type: String, default: 'General' },
   repeat: { type: String, default: 'daily' },
-  isCompleted: { type: Boolean, default: false }
+  isCompleted: { type: Boolean, default: false },
+  streak: { type: Number, default: 0 },
+  lastCompletedDate: { type: Date, default: null },
+  completionHistory: [{ type: Date }]
 }, { timestamps: true });
 
 module.exports = mongoose.model('RoutineBlock', RoutineBlockSchema);

@@ -58,4 +58,20 @@ router.put('/profile', async (req, res) => {
   }
 });
 
+// Get user stats
+router.get('/stats', async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ message: 'No token' });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id).select('-password');
+    const xp = user.xp || 0;
+    const level = Math.floor(Math.sqrt(xp) / 2) + 1;
+    res.json({ xp, level, badges: user.badges || [], isPremium: user.isPremium });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 module.exports = router;

@@ -1,15 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import RoutineBlock from '../components/RoutineBlock';
+import BadgePopup from '../components/BadgePopup';
+import AnalyticsChart from '../components/AnalyticsChart';
+import Heatmap from '../components/Heatmap';
+import Upgrade from './Upgrade';
 
 const API = 'http://localhost:5000/api/routines';
 
-function Home() {
+function Home({ onBlockToggle, isPremium: isPremiumProp }) {
   const [blocks, setBlocks] = useState([]);
   const [form, setForm] = useState({
     title: '', startTime: '', durationMins: '', category: 'General'
   });
   const [showForm, setShowForm] = useState(false);
+  const [newBadges, setNewBadges] = useState([]);
+  const [showUpgrade, setShowUpgrade] = useState(false);
+  const [isPremium, setIsPremium] = useState(isPremiumProp || false);
 
   const fetchBlocks = async () => {
     const res = await axios.get(API);
@@ -17,6 +24,10 @@ function Home() {
   };
 
   useEffect(() => { fetchBlocks(); }, []);
+
+  useEffect(() => {
+    setIsPremium(isPremiumProp || false);
+  }, [isPremiumProp]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,8 +38,15 @@ function Home() {
   };
 
   const handleToggle = async (id) => {
-    await axios.patch(`${API}/${id}/toggle`);
+    const token = localStorage.getItem('token');
+    const res = await axios.patch(`${API}/${id}/toggle`, {}, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (res.data.newBadges && res.data.newBadges.length > 0) {
+      setNewBadges(res.data.newBadges);
+    }
     fetchBlocks();
+    if (onBlockToggle) onBlockToggle();
   };
 
   const handleDelete = async (id) => {
@@ -68,12 +86,15 @@ function Home() {
             </div>
             {percent === 100 && (
               <p style={{ color: '#10b981', fontSize: '13px', marginTop: '8px', fontWeight: '600' }}>
-                All done for today!
+                All done for today! 🎉
               </p>
             )}
           </div>
         )}
       </div>
+
+      <AnalyticsChart isPremium={isPremium} onUpgrade={() => setShowUpgrade(true)} />
+      <Heatmap isPremium={isPremium} onUpgrade={() => setShowUpgrade(true)} />
 
       <button onClick={() => setShowForm(!showForm)} style={{
         background: '#4f46e5', color: '#fff', border: 'none',
@@ -129,6 +150,18 @@ function Home() {
           <p style={{ color: '#aaa', fontSize: '14px' }}>No blocks yet. Add your first routine!</p>
         </div>
       )}
+
+      {newBadges.length > 0 && (
+        <BadgePopup badges={newBadges} onClose={() => setNewBadges([])} />
+      )}
+
+      {showUpgrade && (
+        <Upgrade
+          onUpgrade={() => { setIsPremium(true); setShowUpgrade(false); }}
+          onClose={() => setShowUpgrade(false)}
+        />
+      )}
+
     </div>
   );
 }

@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import ProfileModal from './components/ProfileModal';
+
+const AUTH_API = 'http://localhost:5000/api/auth';
 
 function App() {
   const [user, setUser] = useState(() => {
@@ -9,6 +12,24 @@ function App() {
     return saved ? JSON.parse(saved) : null;
   });
   const [showProfile, setShowProfile] = useState(false);
+  const [stats, setStats] = useState({ xp: 0, level: 1 });
+
+  const fetchStats = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      const res = await axios.get(`${AUTH_API}/stats`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setStats(res.data);
+    } catch (err) {
+      console.log('Stats error', err);
+    }
+  };
+
+  useEffect(() => {
+    if (user) fetchStats();
+  }, [user]);
 
   const handleAuth = (userData) => setUser(userData);
 
@@ -26,14 +47,15 @@ function App() {
 
   return (
     <div className="app">
+      {/* Header */}
       <div style={{
         display: 'flex', justifyContent: 'space-between',
         alignItems: 'center', marginBottom: '20px',
         background: '#fff', padding: '14px 20px',
         borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
       }}>
-        <div
-          onClick={() => setShowProfile(true)}
+        {/* Avatar & Name */}
+        <div onClick={() => setShowProfile(true)}
           style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
           {user.avatar ? (
             <img src={user.avatar} alt="avatar"
@@ -55,14 +77,32 @@ function App() {
             <p style={{ fontSize: '12px', color: '#888' }}>Tap to edit profile</p>
           </div>
         </div>
-        <button onClick={handleLogout} style={{
-          background: 'transparent', border: '1px solid #e5e7eb',
-          padding: '8px 16px', borderRadius: '8px',
-          fontSize: '13px', cursor: 'pointer', color: '#666'
-        }}>Logout</button>
+
+        {/* XP & Level */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{
+            background: '#fef3c7', color: '#92400e',
+            padding: '4px 12px', borderRadius: '99px',
+            fontSize: '12px', fontWeight: '600'
+          }}>
+            ⭐ {stats.xp} XP
+          </div>
+          <div style={{
+            background: '#ede9fe', color: '#5b21b6',
+            padding: '4px 12px', borderRadius: '99px',
+            fontSize: '12px', fontWeight: '600'
+          }}>
+            🏆 Lv.{stats.level}
+          </div>
+          <button onClick={handleLogout} style={{
+            background: 'transparent', border: '1px solid #e5e7eb',
+            padding: '8px 16px', borderRadius: '8px',
+            fontSize: '13px', cursor: 'pointer', color: '#666'
+          }}>Logout</button>
+        </div>
       </div>
 
-      <Home />
+      <Home onBlockToggle={fetchStats} />
 
       {showProfile && (
         <ProfileModal
