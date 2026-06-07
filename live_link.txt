@@ -1,0 +1,9 @@
+Project Name: HabitForge - Daily Routine Scheduler
+
+Live Link: https://major-85pum9x2w-deva-princy-s-projects.vercel.app
+
+Demo Login:
+Email: demo@habitforge.com
+Password: demo123
+
+GitHub: https://github.com/devprincy/major
